@@ -18,14 +18,14 @@ class Program
         Database database = new Database();
         bool isRun = true;
 
-        database.AddPlayer(new Player(0, "Den", 00, false));
-        database.AddPlayer(new Player(1, "Serg", 11, false));
-        database.AddPlayer(new Player(2, "Alex", 22, false));
-        database.AddPlayer(new Player(3, "Petr", 33, false));
-        database.AddPlayer(new Player(4, "Anna", 44, false));
-        database.AddPlayer(new Player(5, "Ket", 55, false));
-        database.AddPlayer(new Player(6, "Oner", 66, false));
-        database.AddPlayer(new Player(7, "Akira", 77, false));
+        database.AddPlayer(new Player(0, "Den", 00));
+        database.AddPlayer(new Player(1, "Serg", 11));
+        database.AddPlayer(new Player(2, "Alex", 22));
+        database.AddPlayer(new Player(3, "Petr", 33));
+        database.AddPlayer(new Player(4, "Anna", 44));
+        database.AddPlayer(new Player(5, "Ket", 55));
+        database.AddPlayer(new Player(6, "Oner", 66));
+        database.AddPlayer(new Player(7, "Akira", 77));
 
         Console.WriteLine($"Menu: {CommandAdd}-Add;");
         Console.WriteLine($"      {CommandDelete}-Delete;");
@@ -43,28 +43,63 @@ class Program
             switch (choise)
             {
                 case CommandAdd:
-                    database.AddPlayer(database.CreatePlaer());
+                    database.AddPlayer(Player.CreatePlaer());
                     break;
+
                 case CommandExit:
                     isRun = false;
                     break;
+
                 case CommandShowAll:
-                    database.ShowAllPlayerData();
+                    database.ShowAllPlayersData();
                     break;
+
                 case CommandDelete:
-                    database.DeletePlayer(database.GetPlaerId());
+                    database.DeletePlayer();
                     break;
+
                 case CommandBan:
-                    database.BanPlayer(database.GetPlaerId());
+                    database.BanPlayer();
                     break;
+
                 case CommandUnban:
-                    database.UnbanPlayer(database.GetPlaerId());
+                    database.UnbanPlayer();
                     break;
+
                 case CommandShow:
-                    database.ShowPlayerData(database.GetPlaerId());
+                    database.ShowPlayerData();
                     break;
             }
         }
+    }
+
+    public static int ReadInt(string text = "")
+    {
+        int digitToOut;
+        Console.Write(text + " ");
+
+        while (int.TryParse(Console.ReadLine(), out digitToOut) == false)
+            Console.Write(text + " ");
+
+        return digitToOut;
+    }
+
+    public static string ReadString(string text = "")
+    {
+        Console.Write(text + " ");
+        string stringFromConsole = Console.ReadLine();
+        return stringFromConsole;
+    }
+
+    public static bool ReadBool(string text = "")
+    {
+        Console.Write(text + " ");
+        bool isOut;
+
+        while (bool.TryParse(Console.ReadLine(), out isOut) == false)
+        { }
+
+        return isOut;
     }
 }
 
@@ -77,110 +112,105 @@ class Database
         _players = new List<Player>();
     }
 
-    public int GetPlaerId()
+    public void AddPlayer(Player newPlayer)
     {
-        int id = GetIntFromConsole("Id № ");
-        int idFind = -1;
+        foreach (var player in _players)
+        {
+            if (player.Id == newPlayer.Id)
+            {
+                Console.WriteLine("Player with this Id is present");
+                return;
+            }
+        }
+
+        _players.Add(newPlayer);
+    }
+
+    public void DeletePlayer()
+    {
+        Player player;
+
+        if (TryGetPlayer(out player) == false)
+            return;
 
         for (int i = 0; i < _players.Count; i++)
         {
-            if (_players[i].Id == id)
-                idFind = i;
+            if (player.Id == _players[i].Id)
+            {
+                _players.RemoveAt(i);
+                return;
+            }
         }
-
-        if (idFind < 0)
-            Console.WriteLine("Incorrect Id: ");
-
-        return idFind;
     }
 
-    public void AddPlayer(Player playerData)
-    {
-        _players.Add(playerData);
-    }
-
-    public Player CreatePlaer()
-    {
-        int id = GetIntFromConsole("Inpout Id: ");
-        string name = GetStringFromConsole("Inpout Name: ");
-        int level = GetIntFromConsole("Inpout level: ");
-        bool isBan = GetBoolFromConsole("Inpout ban (true/false): ");
-
-        Player player = new Player(id, name, level, isBan);
-        return player;
-    }
-
-    public void DeletePlayer(int indexOfPosition)
-    {
-        if (indexOfPosition < 0 || indexOfPosition >= _players.Count())
-            Console.WriteLine("Error lenght database");
-        else
-            _players.RemoveAt(indexOfPosition);
-    }
-
-    public void ShowPlayerData(int indexOfPosition)
-    {
-        if (indexOfPosition < 0 || indexOfPosition >= _players.Count())
-            Console.WriteLine("Error lenght database");
-        else
-            _players[indexOfPosition].ShowData();
-    }
-
-    public void ShowAllPlayerData()
+    public void ShowAllPlayersData()
     {
         foreach (var player in _players)
             player.ShowData();
     }
 
-    public void BanPlayer(int indexOfPosition)
+    public void ShowPlayerData()
     {
-        if (indexOfPosition < 0 || indexOfPosition >= _players.Count())
-            Console.WriteLine("Error lenght database");
-        else
-            _players[indexOfPosition].Ban();
+        Player player;
+
+        if (TryGetPlayer(out player) == false)
+            return;
+
+        player.ShowData();
     }
 
-    public void UnbanPlayer(int indexOfPosition)
+    public void BanPlayer()
     {
-        if (indexOfPosition < 0 || indexOfPosition >= _players.Count())
-            Console.WriteLine("Error lenght database");
-        else
-            _players[indexOfPosition].Unban();
+        Player player;
+
+        if (TryGetPlayer(out player) == false)
+            return;
+
+        player.Ban();
     }
 
-    private int GetIntFromConsole(string text = "")
+    public void UnbanPlayer()
     {
-        int digitToOut;
-        Console.Write(text + " ");
+        Player player;
 
-        while (int.TryParse(Console.ReadLine(), out digitToOut) == false)
-            Console.Write(text + " ");
+        if (TryGetPlayer(out player) == false)
+            return;
 
-        return digitToOut;
+        player.Unban();
     }
 
-    private string GetStringFromConsole(string text = "")
+    private bool TryGetPlayer(out Player player)
     {
-        Console.Write(text + " ");
-        string stringFromConsole = Console.ReadLine();
-        return stringFromConsole;
+        player = null;
+        int plaerIndexOfPosition = GetPlaerIndexOfPosition();
+
+        if (plaerIndexOfPosition < 0)
+            return false;
+
+        player = _players[plaerIndexOfPosition];
+        return true;
     }
 
-    private bool GetBoolFromConsole(string text = "")
+    private int GetPlaerIndexOfPosition()
     {
-        Console.Write(text + " ");
-        bool isOut;
+        int id = Program.ReadInt("Id № ");
+        int indexOfPosition = -1;
 
-        while (bool.TryParse(Console.ReadLine(), out isOut) == false)
-        { }
+        for (int i = 0; i < _players.Count; i++)
+        {
+            if (_players[i].Id == id)
+                indexOfPosition = i;
+        }
 
-        return isOut;
+        if (indexOfPosition < 0)
+            Console.WriteLine("Incorrect Id: ");
+
+        return indexOfPosition;
     }
 }
 
 class Player
 {
-    public int Id { get; private set; }
     private string _name;
     private int _level;
     private bool _isBan;
@@ -192,6 +222,18 @@ class Player
         _level = level;
         _isBan = isBan;
     }
+
+    public static Player CreatePlaer()
+    {
+        int id = Program.ReadInt("Inpout Id: ");
+        string name = Program.ReadString("Inpout Name: ");
+        int level = Program.ReadInt("Inpout level: ");
+        bool isBan = Program.ReadBool("Inpout ban (true/false): ");
+
+        return new Player(id, name, level, isBan);
+    }
+
+    public int Id { get; private set; }
 
     public void ShowData()
     {
