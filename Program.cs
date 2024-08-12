@@ -84,7 +84,7 @@ class Database
 
         for (int i = 0; i < _players.Count; i++)
         {
-            if (_players[i].GetId() == id)
+            if (_players[i].Id == id)
                 idFind = i;
         }
 
@@ -106,8 +106,8 @@ class Database
         int level = GetIntFromConsole("Inpout level: ");
         bool isBan = GetBoolFromConsole("Inpout ban (true/false): ");
 
-        Player tempPlayerData = new Player(id, name, level, isBan);
-        return tempPlayerData;
+        Player player = new Player(id, name, level, isBan);
+        return player;
     }
 
     public void DeletePlayer(int indexOfPosition)
@@ -169,25 +169,10 @@ class Database
     private bool GetBoolFromConsole(string text = "")
     {
         Console.Write(text + " ");
-        bool isOut = false;
-        bool isRun = true;
+        bool isOut;
 
-        while (isRun)
-        {
-            string stringFromConsole = (Console.ReadLine()).ToLower();
-
-            if (stringFromConsole == "true")
-            {
-                isOut = true;
-                isRun = false;
-            }
-
-            if (stringFromConsole == "false")
-            {
-                isOut = false;
-                isRun = false;
-            }
-        }
+        while (bool.TryParse(Console.ReadLine(), out isOut) == false)
+        { }
 
         return isOut;
     }
@@ -195,14 +180,14 @@ class Database
 
 class Player
 {
-    private int _id;
+    public int Id { get; private set; }
     private string _name;
     private int _level;
     private bool _isBan;
 
     public Player(int id = 0, string name = "no name", int level = 0, bool isBan = false)
     {
-        _id = id;
+        Id = id;
         _name = name;
         _level = level;
         _isBan = isBan;
@@ -210,7 +195,7 @@ class Player
 
     public void ShowData()
     {
-        Console.WriteLine($"{_id}  {_name}  {_level}  {_isBan}");
+        Console.WriteLine($"{Id}  {_name}  {_level}  {_isBan}");
     }
 
     public void Ban()
@@ -221,10 +206,5 @@ class Player
     public void Unban()
     {
         _isBan = false;
-    }
-
-    public int GetId()
-    {
-        return _id;
     }
 }
